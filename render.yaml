@@ -54,8 +54,9 @@ services:
       - fromGroup: travel-shared
 
   # Vue 3 frontend served as a static site
-  - type: static
+  - type: web
     name: travel-frontend
+    env: static
     rootDir: frontend/vue-project
     buildCommand: "npm install && npm run build"
     staticPublishPath: dist
