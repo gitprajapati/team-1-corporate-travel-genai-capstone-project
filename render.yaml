@@ -1,0 +1,112 @@
+# Render deployment configuration for Yash Travel Management Platform
+# https://render.com/docs/infrastructure-as-code
+
+previews:
+  generation: manual
+
+services:
+  # FastAPI backend exposing the travel management APIs
+  - type: web
+    name: travel-api
+    env: python
+    plan: starter
+    region: oregon
+    buildCommand: "pip install --upgrade pip && pip install -r requirements.txt"
+    startCommand: "uvicorn src.main:app --host 0.0.0.0 --port $PORT"
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: AZURE_API_KEY
+        sync: false
+      - key: AZURE_API_BASE
+        sync: false
+      - key: AZURE_API_VERSION
+        sync: false
+      - key: AZURE_MODEL
+        value: azure/gpt-4o
+      - key: SECRET_KEY
+        sync: false
+      - key: DB_HOST
+        value: your-cloud-postgres-host
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_NAME
+        value: travel_db
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSLMODE
+        value: require
+      - key: MILVUS_URI
+        value: your-cloud-milvus-endpoint:19530
+      - key: MILVUS_TOKEN
+        sync: false
+      - key: MCP_AIRLINE_URL
+        value: https://airline-mcp.example.com/mcp
+      - key: MCP_HOTEL_URL
+        value: https://hotel-mcp.example.com/mcp
+      - key: SESSION_TIMEOUT_HOURS
+        value: "1"
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "60"
+      - fromGroup: travel-shared
+
+  # Vue 3 frontend served as a static site
+  - type: static
+    name: travel-frontend
+    rootDir: frontend/vue-project
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://travel-api.onrender.com
+
+  # MCP airline booking server (optional background service)
+  - type: worker
+    name: airline-mcp
+    env: docker
+    rootDir: src/mcp_servers
+    dockerfilePath: airlines/Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "8001"
+      - key: MILVUS_URI
+        value: your-cloud-milvus-endpoint:19530
+      - key: MILVUS_TOKEN
+        sync: false
+
+  # MCP hotel booking server (optional background service)
+  - type: worker
+    name: hotel-mcp
+    env: docker
+    rootDir: src/mcp_servers
+    dockerfilePath: hotel/Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "8002"
+      - key: MILVUS_URI
+        value: your-cloud-milvus-endpoint:19530
+      - key: MILVUS_TOKEN
+        sync: false
+
+envVarGroups:
+  - name: travel-shared
+    envVars:
+      - key: LLM_TEMPERATURE
+        value: "0.3"
+      - key: RAG_TOP_K
+        value: "3"
+      - key: RAG_CONTEXT_MAX_CHARS
+        value: "1800"
+      - key: MCP_AIRLINE_COMMAND
+        value: ""
+      - key: MCP_AIRLINE_ARGS
+        value: ""
+      - key: MCP_HOTEL_COMMAND
+        value: ""
+      - key: MCP_HOTEL_ARGS
+        value: ""
