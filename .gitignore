@@ -5,7 +5,6 @@ __pycache__/
 *.so
 .venv/
 .env
-.env.*
 
 # Operating system
 .DS_Store
