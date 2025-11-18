@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+.venv/
+.env
+.env.*
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Editors/IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and runtime
+*.log
+logs/
+*.pid
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Node / frontend
+node_modules/
+frontend/vue-project/node_modules/
+frontend/vue-project/.vite/
+frontend/vue-project/dist/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Docker artifacts
+docker-compose.override.yml
+
+# Local data
+*.sqlite3
+*.db
+media/
+uploads/
+
+# Coverage / testing
+.coverage
+htmlcov/
+.cache/
+.pytest_cache/
+
+# Misc
+*.bak
+*.tmp
+*.orig

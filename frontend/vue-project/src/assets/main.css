@@ -1,0 +1,140 @@
+:root {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  color-scheme: light;
+  --primary-600: #2563eb;
+  --primary-500: #3b82f6;
+  --primary-50: #eff6ff;
+  --slate-900: #0f172a;
+  --slate-700: #334155;
+  --slate-600: #475569;
+  --slate-500: #64748b;
+  --slate-200: #e2e8f0;
+  --slate-100: #f1f5f9;
+  --slate-50: #f8fafc;
+  --success-100: #ecfdf5;
+  --success-500: #10b981;
+  --warning-100: #fefce8;
+  --warning-500: #eab308;
+  --danger-100: #fef2f2;
+  --danger-500: #ef4444;
+  background-color: var(--slate-50);
+  color: var(--slate-900);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--slate-50);
+}
+
+a {
+  color: var(--primary-600);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+select,
+textarea,
+button {
+  font-size: 1rem;
+}
+
+.primary-btn {
+  border: none;
+  border-radius: 0.9rem;
+  padding: 0.85rem 1.2rem;
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.primary-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.primary-btn:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 15px 30px rgba(79, 70, 229, 0.35);
+}
+
+.ghost-btn {
+  border: 1px solid var(--slate-200);
+  border-radius: 0.8rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.pattern-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background-color: #ffffff;
+  background-image:
+    radial-gradient(circle at 15% 15%, var(--pattern-accent-1, rgba(59, 130, 246, 0.15)), transparent 55%),
+    radial-gradient(circle at 85% 0%, var(--pattern-accent-2, rgba(14, 165, 233, 0.12)), transparent 40%),
+    linear-gradient(135deg, #ffffff, #f8fbff);
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.08);
+}
+
+.pattern-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.25) 1px, transparent 1px);
+  background-size: 140px 140px;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.pattern-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pattern-card--blue {
+  --pattern-accent-1: rgba(59, 130, 246, 0.22);
+  --pattern-accent-2: rgba(14, 165, 233, 0.2);
+}
+
+.pattern-card--lavender {
+  --pattern-accent-1: rgba(167, 139, 250, 0.28);
+  --pattern-accent-2: rgba(244, 114, 182, 0.2);
+}
+
+.pattern-card--slate {
+  --pattern-accent-1: rgba(59, 130, 246, 0.12);
+  --pattern-accent-2: rgba(15, 118, 110, 0.12);
+}
+
+.pattern-card--amber {
+  --pattern-accent-1: rgba(251, 191, 36, 0.35);
+  --pattern-accent-2: rgba(244, 114, 182, 0.22);
+}
+
+.pattern-card--emerald {
+  --pattern-accent-1: rgba(16, 185, 129, 0.28);
+  --pattern-accent-2: rgba(59, 130, 246, 0.18);
+}
+
+.pattern-card--violet {
+  --pattern-accent-1: rgba(99, 102, 241, 0.3);
+  --pattern-accent-2: rgba(236, 72, 153, 0.2);
+}

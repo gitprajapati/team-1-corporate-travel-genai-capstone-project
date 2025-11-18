@@ -1,0 +1,56 @@
+.git
+.gitignore
+Dockerfile
+Dockerfile.*
+.dockerignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+.venv/
+
+# Virtual environments
+.env
+.env.*
+
+# Node / frontend
+node_modules/
+frontend/vue-project/node_modules/
+frontend/vue-project/.vite/
+frontend/vue-project/dist/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Logs and runtime
+*.log
+logs/
+*.pid
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Tests and coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.cache/
+
+# Local data and media
+media/
+uploads/
+*.sqlite3
+*.db
+
+# Notebooks
+.ipynb_checkpoints/

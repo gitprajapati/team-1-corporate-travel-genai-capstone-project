@@ -1,0 +1,169 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gen-ai-api
+    env_file:
+      - .env
+    environment:
+      PORT: ${API_PORT:-8000}
+      PYTHONPATH: /app
+      MCP_AIRLINE_URL: http://airline-mcp:${AIRLINE_MCP_PORT:-8001}
+      MCP_HOTEL_URL: http://hotel-mcp:${HOTEL_MCP_PORT:-8002}
+      MCP_AIRLINE_ARGS: "-y,mcp-remote,http://airline-mcp:${AIRLINE_MCP_PORT:-8001}/mcp"
+      MCP_HOTEL_ARGS: "-y,mcp-remote,http://hotel-mcp:${HOTEL_MCP_PORT:-8002}/mcp"
+      MILVUS_URI: ${MILVUS_URI:-milvus:19530}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./prompts:/app/prompts
+      - ./scripts:/app/scripts
+    depends_on:
+      - airline-mcp
+      - hotel-mcp
+      - milvus
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    networks:
+      - gen-ai
+
+  web:
+    build:
+      context: ./frontend/vue-project
+      dockerfile: Dockerfile
+      target: dev
+    container_name: gen-ai-web
+    environment:
+      VITE_API_BASE_URL: http://api:8000
+      CHOKIDAR_USEPOLLING: "true"
+      NODE_ENV: development
+    ports:
+      - "${WEB_PORT:-5173}:5173"
+    volumes:
+      - ./frontend/vue-project:/app
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - gen-ai
+
+  airline-mcp:
+    build:
+      context: ./src/mcp_servers
+      dockerfile: airlines/Dockerfile
+    container_name: gen-ai-airline-mcp
+    env_file:
+      - .env
+    environment:
+      PORT: ${AIRLINE_MCP_PORT:-8001}
+      AIRLINES_DB_SSLMODE: ${AIRLINES_DB_SSLMODE:-require}
+    ports:
+      - "${AIRLINE_MCP_PORT:-8001}:8001"
+    restart: unless-stopped
+    networks:
+      - gen-ai
+
+  hotel-mcp:
+    build:
+      context: ./src/mcp_servers
+      dockerfile: hotel/Dockerfile
+    container_name: gen-ai-hotel-mcp
+    env_file:
+      - .env
+    environment:
+      PORT: ${HOTEL_MCP_PORT:-8002}
+      HOTEL_DB_SSLMODE: ${HOTEL_DB_SSLMODE:-require}
+    ports:
+      - "${HOTEL_MCP_PORT:-8002}:8002"
+    restart: unless-stopped
+    networks:
+      - gen-ai
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.15
+    container_name: gen-ai-etcd
+    command:
+      - etcd
+      - --advertise-client-urls
+      - http://etcd:2379
+      - --listen-client-urls
+      - http://0.0.0.0:2379
+      - --listen-peer-urls
+      - http://0.0.0.0:2380
+      - --initial-advertise-peer-urls
+      - http://etcd:2380
+      - --initial-cluster
+      - etcd=http://etcd:2380
+      - --initial-cluster-token
+      - gen-ai-etcd
+      - --initial-cluster-state
+      - new
+      - --data-dir
+      - /var/lib/etcd
+    environment:
+      ETCD_AUTO_COMPACTION_MODE: periodic
+      ETCD_AUTO_COMPACTION_RETENTION: "24"
+      ETCD_QUOTA_BACKEND_BYTES: "4294967296"
+      ETCD_SNAPSHOT_COUNT: "100000"
+    volumes:
+      - etcd_data:/var/lib/etcd
+    restart: unless-stopped
+    networks:
+      - gen-ai
+
+  minio:
+    image: minio/minio:RELEASE.2024-09-22T00-33-43Z
+    container_name: gen-ai-minio
+    command: server --console-address :9001 /data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    restart: unless-stopped
+    networks:
+      - gen-ai
+
+  milvus:
+    image: milvusdb/milvus:v2.4.6
+    container_name: gen-ai-milvus
+    command: ["milvus", "run", "standalone"]
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - milvus_data:/var/lib/milvus
+    depends_on:
+      - etcd
+      - minio
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    restart: unless-stopped
+    networks:
+      - gen-ai
+
+networks:
+  gen-ai:
+    driver: bridge
+
+volumes:
+  etcd_data:
+  minio_data:
+  milvus_data:
+  frontend_node_modules:
