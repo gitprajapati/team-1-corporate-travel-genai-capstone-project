@@ -11,11 +11,11 @@ AI-powered corporate travel workflow for Yash employees, managers, and HR travel
 
 ## Architecture Snapshot
 ```
-[Vue 3 SPA] --REST--> [FastAPI Service] --SQL--> [PostgreSQL]
-												  \--MCP--> [Airline Booking Server]
-												  \--MCP--> [Hotel Booking Server]
-												  \--Vector--> [Milvus]
-												  \--LLM--> [Azure OpenAI]
+[Vue 3 SPA] --REST--> [FastAPI Service] --SQL--> [Cloud PostgreSQL]
+						  \--MCP--> [Airline Booking Server]
+						  \--MCP--> [Hotel Booking Server]
+						  \--Vector--> [Cloud Milvus]
+						  \--LLM--> [Azure OpenAI]
 ```
 
 ## Documentation
@@ -30,7 +30,7 @@ AI-powered corporate travel workflow for Yash employees, managers, and HR travel
 ```bash
 docker compose up --build
 ```
-Make sure your `.env` contains database, Azure OpenAI, and Milvus credentials before starting the stack.
+Compose now assumes you have provisioned cloud services (PostgreSQL, Milvus) and that their connection strings live in `.env`.
 
 ### Option B — Manual Setup
 1. **Create virtual environment**
@@ -51,7 +51,7 @@ Make sure your `.env` contains database, Azure OpenAI, and Milvus credentials be
 	```bash
 	python scripts/init_db.py
 	```
-	Optional: load bookmark helper table via `scripts/create_employee_route_bookmarks.sql`.
+	Optional: run `scripts/create_employee_route_bookmarks.sql` against your cloud database if the feature is enabled.
 5. **Run FastAPI backend**
 	```bash
 	uvicorn src.main:app --reload --port 8000
@@ -91,7 +91,7 @@ Make sure your `.env` contains database, Azure OpenAI, and Milvus credentials be
 3. Vue dashboard exposes bookmark creation, reuse, and usage analytics within the employee workflow.
 
 ## Configuration Essentials
-All runtime settings are environment-driven (see `src/config/settings.py`). Key groups:
+All runtime settings are environment-driven (see `src/config/settings.py`). Key groups (point each to cloud resources):
 - **Database**: `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_SSLMODE`
 - **Auth**: `SECRET_KEY`, `ALGORITHM`, `ACCESS_TOKEN_EXPIRE_MINUTES`
 - **LLM**: `AZURE_API_KEY`, `AZURE_API_BASE`, `AZURE_API_VERSION`, `AZURE_MODEL`, `LLM_TEMPERATURE`
@@ -147,5 +147,5 @@ Gen-AI-Capstone-Projects/
 ## Troubleshooting
 - **401/403 responses**: verify the correct role is logged in and the JWT is valid (`/auth/me`).
 - **MCP errors**: confirm airline/hotel servers are running; `/hr-mcp/health` lists available tools.
-- **Milvus issues**: ensure collection exists and credentials match `.env`; see `src/rag/milvus_store.py`.
+- **Milvus issues**: ensure your cloud instance is reachable and credentials match `.env`; see `src/rag/milvus_store.py`.
 - **Docker build failures**: update `.env` to provide all required secrets before `docker compose up`.

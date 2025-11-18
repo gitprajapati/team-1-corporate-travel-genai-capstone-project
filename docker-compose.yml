@@ -13,7 +13,7 @@ services:
       MCP_HOTEL_URL: http://hotel-mcp:${HOTEL_MCP_PORT:-8002}
       MCP_AIRLINE_ARGS: "-y,mcp-remote,http://airline-mcp:${AIRLINE_MCP_PORT:-8001}/mcp"
       MCP_HOTEL_ARGS: "-y,mcp-remote,http://hotel-mcp:${HOTEL_MCP_PORT:-8002}/mcp"
-      MILVUS_URI: ${MILVUS_URI:-milvus:19530}
+      MILVUS_URI: ${MILVUS_URI}
     ports:
       - "${API_PORT:-8000}:8000"
     volumes:
@@ -24,7 +24,6 @@ services:
     depends_on:
       - airline-mcp
       - hotel-mcp
-      - milvus
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -89,81 +88,9 @@ services:
     networks:
       - gen-ai
 
-  etcd:
-    image: quay.io/coreos/etcd:v3.5.15
-    container_name: gen-ai-etcd
-    command:
-      - etcd
-      - --advertise-client-urls
-      - http://etcd:2379
-      - --listen-client-urls
-      - http://0.0.0.0:2379
-      - --listen-peer-urls
-      - http://0.0.0.0:2380
-      - --initial-advertise-peer-urls
-      - http://etcd:2380
-      - --initial-cluster
-      - etcd=http://etcd:2380
-      - --initial-cluster-token
-      - gen-ai-etcd
-      - --initial-cluster-state
-      - new
-      - --data-dir
-      - /var/lib/etcd
-    environment:
-      ETCD_AUTO_COMPACTION_MODE: periodic
-      ETCD_AUTO_COMPACTION_RETENTION: "24"
-      ETCD_QUOTA_BACKEND_BYTES: "4294967296"
-      ETCD_SNAPSHOT_COUNT: "100000"
-    volumes:
-      - etcd_data:/var/lib/etcd
-    restart: unless-stopped
-    networks:
-      - gen-ai
-
-  minio:
-    image: minio/minio:RELEASE.2024-09-22T00-33-43Z
-    container_name: gen-ai-minio
-    command: server --console-address :9001 /data
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
-    volumes:
-      - minio_data:/data
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    restart: unless-stopped
-    networks:
-      - gen-ai
-
-  milvus:
-    image: milvusdb/milvus:v2.4.6
-    container_name: gen-ai-milvus
-    command: ["milvus", "run", "standalone"]
-    environment:
-      ETCD_ENDPOINTS: etcd:2379
-      MINIO_ADDRESS: minio:9000
-      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
-    volumes:
-      - milvus_data:/var/lib/milvus
-    depends_on:
-      - etcd
-      - minio
-    ports:
-      - "19530:19530"
-      - "9091:9091"
-    restart: unless-stopped
-    networks:
-      - gen-ai
-
 networks:
   gen-ai:
     driver: bridge
 
 volumes:
-  etcd_data:
-  minio_data:
-  milvus_data:
   frontend_node_modules:
