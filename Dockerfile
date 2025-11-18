@@ -39,7 +39,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /opt/venv /opt/venv
 
 COPY src ./src
-COPY scripts ./scripts
 COPY requirements.txt ./requirements.txt
 
 RUN useradd -m -u 1000 appuser && \

@@ -96,7 +96,7 @@ All runtime settings are environment-driven (see `src/config/settings.py`). Key 
 - **Auth**: `SECRET_KEY`, `ALGORITHM`, `ACCESS_TOKEN_EXPIRE_MINUTES`
 - **LLM**: `AZURE_API_KEY`, `AZURE_API_BASE`, `AZURE_API_VERSION`, `AZURE_MODEL`, `LLM_TEMPERATURE`
 - **Milvus**: `MILVUS_URI`, `MILVUS_TOKEN`, `MILVUS_COLLECTION_NAME`, `MILVUS_DIM`
-- **MCP**: `MCP_AIRLINE_COMMAND`, `MCP_AIRLINE_ARGS`, `MCP_HOTEL_COMMAND`, `MCP_HOTEL_ARGS`
+- **MCP**: `MCP_AIRLINE_URL`, `MCP_HOTEL_URL` (point to `/mcp` endpoints using streamable HTTP)
 - **Sessions**: `SESSION_TIMEOUT_HOURS` for chat lifetimes
 
 
@@ -146,6 +146,6 @@ Gen-AI-Capstone-Projects/
 
 ## Troubleshooting
 - **401/403 responses**: verify the correct role is logged in and the JWT is valid (`/auth/me`).
-- **MCP errors**: confirm airline/hotel servers are running; `/hr-mcp/health` lists available tools.
+- **MCP errors**: confirm airline/hotel servers are reachable at their `/mcp` streamable HTTP endpoints; `/hr-mcp/health` lists available tools.
 - **Milvus issues**: ensure your cloud instance is reachable and credentials match `.env`; see `src/rag/milvus_store.py`.
 - **Docker build failures**: update `.env` to provide all required secrets before `docker compose up`.

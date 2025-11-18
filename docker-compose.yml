@@ -9,10 +9,8 @@ services:
     environment:
       PORT: ${API_PORT:-8000}
       PYTHONPATH: /app
-      MCP_AIRLINE_URL: http://airline-mcp:${AIRLINE_MCP_PORT:-8001}
-      MCP_HOTEL_URL: http://hotel-mcp:${HOTEL_MCP_PORT:-8002}
-      MCP_AIRLINE_ARGS: "-y,mcp-remote,http://airline-mcp:${AIRLINE_MCP_PORT:-8001}/mcp"
-      MCP_HOTEL_ARGS: "-y,mcp-remote,http://hotel-mcp:${HOTEL_MCP_PORT:-8002}/mcp"
+      MCP_AIRLINE_URL: http://airline-mcp:${AIRLINE_MCP_PORT:-8001}/mcp
+      MCP_HOTEL_URL: http://hotel-mcp:${HOTEL_MCP_PORT:-8002}/mcp
       MILVUS_URI: ${MILVUS_URI}
     ports:
       - "${API_PORT:-8000}:8000"
@@ -42,7 +40,7 @@ services:
       target: dev
     container_name: gen-ai-web
     environment:
-      VITE_API_BASE_URL: http://api:8000
+      VITE_API_BASE_URL: http://localhost:${API_PORT:-8000}
       CHOKIDAR_USEPOLLING: "true"
       NODE_ENV: development
     ports:
